@@ -1,6 +1,7 @@
-const createAutocomplete = ({ root })=>{
+const createAutocomplete = ({ root, renderOption, onOptionSelect, inputValue, fetchData })=>{
+    //BUILD HTML ELEMENTS TO HOUSE THE SEARCH RESULTS
     root.innerHTML =`
-        <label><b>Search A Movie</b></label>
+        <label><b>Search</b></label>
         <input class="input"/>
         <div class="dropdown">
             <div class="dropdown-menu">
@@ -10,40 +11,38 @@ const createAutocomplete = ({ root })=>{
             </div>
         </div>
     `;
+    //INDENTIFY THE ELEMENTS
     const input = root.querySelector('.input');
     const dropdown = root.querySelector('.dropdown');
     const resultsWrapper = root.querySelector('.dropdown-content');
-
+    //SHOWING THE SEARCH RESULTS
     const onInput = async (event)=>{
-        const movies = await fetchData(event.target.value);
-
-        if(movies.length){
+        //WAITING FOR DATA
+        const items = await fetchData(event.target.value);
+        //OPENING THE DROPDOWN MENUE IN CASE OF RESULTS
+        if(items.length){
             dropdown.classList.add('is-active');
         }
-        
+        // NOTSHOWING THE LIST IF NO RESULTS
         resultsWrapper.innerHTML = "";
-
-        for(let movie of movies){
+        //SHOWING THE SEARCH ITEMS
+        for(let item of items){
             const option = document.createElement('a');
-            const imgSrc = movie.Poster === 'N/A' ? '' : movie.Poster
-
             option.classList.add('dropdown-item')
-            option.innerHTML = `
-                <img src="${imgSrc}"/>
-                ${movie.Title}
-            `;
+            //HOW TO DISPLAY ON THE LIST
+            option.innerHTML = renderOption(item);
             resultsWrapper.appendChild(option);
-
+            //CLICKING ON AN ITEM OF THE LIST
             option.addEventListener('click', ()=>{
-                input.value = movie.Title;
+                input.value = inputValue(item);
                 dropdown.classList.remove('is-active');
-                movieSelect(movie);
+                onOptionSelect(item);
             })
-            
         }
     }
-    input.addEventListener('input', debounce(onInput, 500))
-
+    //DEBOUNCING THE RESULT SHOW ON LIST UNTILL FINISH WRITING
+    input.addEventListener('input', debounce(onInput, 1000))
+    //CLOSING THE LIST IF CLICKING OUT RANGE
     document.addEventListener('click', event =>{
         if(!root.contains(event.target)){
             dropdown.classList.remove('is-active')
