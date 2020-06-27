@@ -14,17 +14,20 @@ const createAutocomplete = ({ root, renderOption, onOptionSelect, inputValue, fe
     //INDENTIFY THE ELEMENTS
     const input = root.querySelector('.input');
     const dropdown = root.querySelector('.dropdown');
-    const resultsWrapper = root.querySelector('.dropdown-content');
+    const resultsWrapper = root.querySelector('.results');
     //SHOWING THE SEARCH RESULTS
     const onInput = async (event)=>{
         //WAITING FOR DATA
         const items = await fetchData(event.target.value);
+        // HIDING THE LIST IF NO RESULTS
+        if (!items.length) {
+            dropdown.classList.remove('is-active');
+            return;
+          }
+      
+          resultsWrapper.innerHTML = '';
         //OPENING THE DROPDOWN MENUE IN CASE OF RESULTS
-        if(items.length){
-            dropdown.classList.add('is-active');
-        }
-        // NOTSHOWING THE LIST IF NO RESULTS
-        resultsWrapper.innerHTML = "";
+          dropdown.classList.add('is-active');
         //SHOWING THE SEARCH ITEMS
         for(let item of items){
             const option = document.createElement('a');
